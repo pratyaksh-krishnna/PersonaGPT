@@ -1,3 +1,5 @@
+Documentation => https://raspy-brass-6b1.notion.site/Documentation-for-PersonaGPT-3949eb6fd6fe801c8e9bc6ec124fe113?source=copy_link
+
 # PersonaGPT
 
 A Next.js chatbot with two switchable persona modes, backed by the OpenAI Chat Completions API.
