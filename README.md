@@ -1,13 +1,14 @@
-# Persona Chat
+# PersonaGPT
 
 A Next.js chatbot with two switchable persona modes, backed by the OpenAI Chat Completions API.
 
 ## Features
 
-- Two persona modes (**Persona A** / **Persona B**) toggled from the header — each keeps its own conversation thread.
-- Both personas' system prompts are intentionally left **blank** in [`lib/personas.ts`](lib/personas.ts) — fill them in to give each persona its own personality/behavior.
-- Attractive, animated chat UI built with Tailwind CSS (gradients, message bubbles, typing indicator, auto-scroll).
-- Simple server-side API route ([`app/api/chat/route.ts`](app/api/chat/route.ts)) that calls the OpenAI GPT API, so your API key never reaches the browser.
+- Landing page introducing both personas — **Hitesh Chaudhary** and **Piyush Garg**, each with their own tagline, description, and starter questions.
+- Dedicated chat screen at `/chat/[persona]` — each persona keeps its own conversation thread and system prompt.
+- Fully written persona system prompts in [`lib/personas.ts`](lib/personas.ts): identity, tone, knowledge scope, behavior rules, conversation flow, examples, and output-format constraints (20-60 word replies, in-character only).
+- Simple server-side API route ([`app/api/chat/route.ts`](app/api/chat/route.ts)) that calls the OpenAI Chat Completions API, so your API key never reaches the browser.
+- Custom Tailwind CSS theme (parchment/pine/ember palette) with animated, responsive chat UI.
 
 ## Getting started
 
@@ -30,36 +31,28 @@ A Next.js chatbot with two switchable persona modes, backed by the OpenAI Chat C
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000).
+4. Open [http://localhost:3000](http://localhost:3000), pick a persona, and start chatting.
 
 ## Customizing the personas
 
-Edit [`lib/personas.ts`](lib/personas.ts) to set each persona's name, tagline, avatar, color accent, and — most importantly — its `systemPrompt`:
+Edit [`lib/personas.ts`](lib/personas.ts) to change a persona's name, tagline, description, starter questions, avatar image, color theme, or `systemPrompt`. Each persona is keyed by a `PersonaId` (`"A"` or `"B"`) and exposes:
 
 ```ts
-export const PERSONAS: Record<PersonaId, Persona> = {
-  A: {
-    id: "A",
-    name: "Persona A",
-    tagline: "Mode one",
-    avatar: "🅰️",
-    accent: "from-violet-500 to-fuchsia-500",
-    gradient: "from-violet-500/20 via-fuchsia-500/10 to-transparent",
-    systemPrompt: "", // <- put Persona A's behavior/instructions here
-  },
-  B: {
-    id: "B",
-    name: "Persona B",
-    tagline: "Mode two",
-    avatar: "🅱️",
-    accent: "from-cyan-500 to-blue-500",
-    gradient: "from-cyan-500/20 via-blue-500/10 to-transparent",
-    systemPrompt: "", // <- put Persona B's behavior/instructions here
-  },
-};
+export interface Persona {
+  id: PersonaId;
+  slug: string;         // used in the /chat/[persona] route
+  name: string;
+  tagline: string;
+  description: string;
+  starters: string[];   // suggested starter questions shown on the landing page
+  initial: string;
+  image: string;
+  theme: PersonaTheme;  // Tailwind classes for badges, buttons, accents
+  systemPrompt: string;
+}
 ```
 
-The system prompt is sent as the first message to the model on every request for that persona.
+The `systemPrompt` is sent as the first message to the model on every request for that persona, so any change to voice, rules, or constraints belongs there.
 
 ## Changing the model
 
@@ -69,10 +62,12 @@ The model used for completions is set in [`app/api/chat/route.ts`](app/api/chat/
 
 ```
 app/
-  api/chat/route.ts   # server route that calls the OpenAI API
-  page.tsx            # chat UI (persona toggle, messages, input)
-  layout.tsx          # root layout
-  globals.css         # Tailwind + custom animations
+  page.tsx                    # landing page (persona picker)
+  layout.tsx                  # root layout
+  globals.css                 # Tailwind + custom theme/animations
+  chat/[persona]/page.tsx     # chat route for a given persona slug
+  chat/[persona]/chat-screen.tsx  # chat UI (messages, input, typing indicator)
+  api/chat/route.ts           # server route that calls the OpenAI API
 lib/
-  personas.ts         # persona definitions (system prompts left blank)
+  personas.ts                 # persona definitions, themes, and system prompts
 ```
